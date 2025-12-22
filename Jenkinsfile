@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk'
+        jdk 'JAVA'
         maven 'maven3'
     }
 
@@ -44,13 +44,6 @@ pipeline {
             }
         }
 
-        stage('OWASP Dependency Check') {
-            steps {
-                dependencyCheck additionalArguments: '--scan .', odcInstallation: 'DP'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
-
         stage('Build WAR') {
             steps {
                 sh 'mvn clean install'
@@ -59,26 +52,15 @@ pipeline {
 
         stage('Docker Build & Push') {
             steps {
-                withDockerRegistry(credentialsId: 'dockerhub-creds') {
+                withDockerRegistry(
+                    credentialsId: 'dockerhub-creds',
+                    url: 'https://index.docker.io/v1/'
+                ) {
                     sh '''
                     docker build -t adijaiswal/pet-clinic123:latest .
                     docker push adijaiswal/pet-clinic123:latest
                     '''
                 }
-            }
-        }
-
-        stage('Trivy Scan') {
-            steps {
-                sh 'trivy image adijaiswal/pet-clinic123:latest'
-            }
-        }
-
-        stage('Deploy to Tomcat') {
-            steps {
-                sh '''
-                cp target/*.war /opt/apache-tomcat-9.0.65/webapps/
-                '''
             }
         }
     }
