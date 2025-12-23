@@ -1,5 +1,9 @@
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-jammy
+
 WORKDIR /app
-COPY target/petclinic.war app.war
-EXPOSE 8082
+
+COPY target/*.war app.war
+
+EXPOSE 8080
+
 ENTRYPOINT ["java","-jar","app.war"]
