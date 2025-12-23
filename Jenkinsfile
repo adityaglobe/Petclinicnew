@@ -12,12 +12,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/adityaglobe/Petclinicnew'
-            }
-        }
-
         stage('Build WAR') {
             steps {
                 sh 'mvn clean package'
