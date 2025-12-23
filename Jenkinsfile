@@ -3,62 +3,36 @@ pipeline {
 
     tools {
         jdk 'JAVA'
-        maven 'maven3'
+        maven 'MAVEN'
     }
 
     environment {
-        SCANNER_HOME = tool 'sonar-scanner'
+        IMAGE_NAME = "adityasharmaducat007/petclinic"
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                url: 'https://github.com/adityaglobe/Petclinicnew.git'
-            }
-        }
-
-        stage('Compile') {
-            steps {
-                sh 'mvn clean compile'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''
-                    $SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectKey=petclinic \
-                    -Dsonar.projectName=petclinic \
-                    -Dsonar.java.binaries=target
-                    '''
-                }
+                git 'https://github.com/adityaglobe/Petclinicnew.git'
             }
         }
 
         stage('Build WAR') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn clean package'
             }
         }
 
         stage('Docker Build & Push') {
             steps {
                 withDockerRegistry(
-                    credentialsId: 'dockerhub-creds',
-                    url: 'https://index.docker.io/v1/'
+                  credentialsId: 'dockerhub-creds',
+                  url: 'https://index.docker.io/v1/'
                 ) {
                     sh '''
-                    docker build -t adijaiswal/pet-clinic123:latest .
-                    docker push adijaiswal/pet-clinic123:latest
+                    docker build -t $IMAGE_NAME:latest .
+                    docker push $IMAGE_NAME:latest
                     '''
                 }
             }
